@@ -12,8 +12,7 @@ app.use(cors());
 
 // ✅ IMPORTANT FIX
 const PORT = process.env.PORT || 3000;
-const SECRET = "supersecretkey";
-
+app.listen(PORT);
 // ===== OPENAI SETUP =====
 const client = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
