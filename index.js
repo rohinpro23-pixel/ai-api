@@ -1,17 +1,17 @@
-// FULL AI PLATFORM API (REAL AI VERSION - Chat Enabled)
-// Node.js + Express + JWT + Rate Limit + OpenAI Chat + File Generator (basic)
-
 import express from "express";
 import bodyParser from "body-parser";
 import jwt from "jsonwebtoken";
 import bcrypt from "bcrypt";
 import rateLimit from "express-rate-limit";
 import OpenAI from "openai";
+import cors from "cors";
 
 const app = express();
 app.use(bodyParser.json());
+app.use(cors());
 
-const PORT = 3000;
+// ✅ IMPORTANT FIX
+const PORT = process.env.PORT || 3000;
 const SECRET = "supersecretkey";
 
 // ===== OPENAI SETUP =====
@@ -44,6 +44,11 @@ function auth(req, res, next) {
   }
 }
 
+// ===== ROOT (VERY IMPORTANT) =====
+app.get("/", (req, res) => {
+  res.send("API is working");
+});
+
 // ===== REGISTER =====
 app.post("/register", async (req, res) => {
   const { username, password } = req.body;
@@ -72,7 +77,7 @@ app.post("/login", async (req, res) => {
   res.json({ token });
 });
 
-// ===== REAL AI CHAT =====
+// ===== AI CHAT =====
 app.post("/ai/chat", auth, async (req, res) => {
   try {
     const { prompt } = req.body;
@@ -90,12 +95,14 @@ app.post("/ai/chat", auth, async (req, res) => {
     history.push({ user: req.user.username, type: "chat", prompt, reply });
 
     res.json({ reply });
+
   } catch (err) {
+    console.error(err);
     res.status(500).send("AI error");
   }
 });
 
-// ===== IMAGE (STILL MOCK) =====
+// ===== IMAGE (MOCK) =====
 app.post("/ai/image", auth, (req, res) => {
   const { prompt } = req.body;
 
@@ -106,7 +113,7 @@ app.post("/ai/image", auth, (req, res) => {
   res.json({ imageUrl });
 });
 
-// ===== FILE GENERATOR (BASIC) =====
+// ===== FILE GENERATOR =====
 app.post("/generate-file", auth, (req, res) => {
   const { type, topic } = req.body;
 
@@ -128,19 +135,7 @@ app.get("/history", auth, (req, res) => {
   res.json(userHistory);
 });
 
-// ===== START =====
-app.listen(PORT, () => console.log(`Server running on ${PORT}`));
-
-/*
-SETUP:
-1. npm install express body-parser jsonwebtoken bcrypt express-rate-limit openai
-2. Create .env file:
-   OPENAI_API_KEY=your_api_key_here
-3. Run: node index.js
-
-NOW YOU HAVE:
-- REAL AI chat working
-- login system
-- protected API
-- base for scaling
-*/
+// ===== START SERVER =====
+app.listen(PORT, () => {
+  console.log("Server running on " + PORT);
+});
