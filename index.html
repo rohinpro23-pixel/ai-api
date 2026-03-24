@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>My AI App</title>
+  <style>
+    body { font-family: Arial; text-align: center; margin-top: 50px; }
+    input, button { padding: 10px; margin: 5px; width: 300px; }
+    #response { margin-top: 20px; font-weight: bold; }
+  </style>
+</head>
+<body>
+
+<h2>My AI App</h2>
+
+<!-- Register -->
+<input id="regUser" placeholder="Username">
+<input id="regPass" placeholder="Password" type="password">
+<button onclick="register()">Register</button>
+
+<br><br>
+
+<!-- Login -->
+<input id="logUser" placeholder="Username">
+<input id="logPass" placeholder="Password" type="password">
+<button onclick="login()">Login</button>
+
+<br><br>
+
+<!-- Ask AI -->
+<input id="prompt" placeholder="Ask something...">
+<button onclick="askAI()">Ask AI</button>
+
+<div id="response"></div>
+
+<script>
+let token = "";
+
+// 🔥 IMPORTANT: Replace with YOUR Railway URL
+const BASE_URL = "https://your-api-url.up.railway.app";
+
+// Helper to handle errors
+async function safeFetch(url, options) {
+  try {
+    const res = await fetch(url, options);
+
+    if (!res.ok) {
+      const text = await res.text();
+      throw new Error(text || "Request failed");
+    }
+
+    return res;
+  } catch (err) {
+    console.error("Fetch Error:", err);
+    alert("Error: " + err.message + "\n\nCheck:\n1. URL correct\n2. Backend running\n3. CORS enabled");
+    throw err;
+  }
+}
+
+async function register() {
+  const res = await safeFetch(BASE_URL + "/register", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      username: document.getElementById("regUser").value,
+      password: document.getElementById("regPass").value
+    })
+  });
+
+  alert(await res.text());
+}
+
+async function login() {
+  const res = await safeFetch(BASE_URL + "/login", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({
+      username: document.getElementById("logUser").value,
+      password: document.getElementById("logPass").value
+    })
+  });
+
+  const data = await res.json();
+
+  if (!data.token) {
+    alert("Login failed");
+    return;
+  }
+
+  token = data.token;
+  alert("Logged in!");
+}
+
+async function askAI() {
+  if (!token) {
+    alert("Login first!");
+    return;
+  }
+
+  const res = await safeFetch(BASE_URL + "/ai/chat", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": token
+    },
+    body: JSON.stringify({
+      prompt: document.getElementById("prompt").value
+    })
+  });
+
+  const data = await res.json();
+
+  if (!data.reply) {
+    document.getElementById("response").innerText = "No response from AI";
+    return;
+  }
+
+  document.getElementById("response").innerText = data.reply;
+}
+</script>
+
+</body>
+</html>
