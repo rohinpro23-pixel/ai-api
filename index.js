@@ -1,3 +1,4 @@
+// index.js
 import express from "express";
 import cors from "cors";
 import OpenAI from "openai";
@@ -6,20 +7,20 @@ const app = express();
 app.use(express.json());
 app.use(cors());
 
-// ✅ Railway PORT (DON’T TOUCH THIS)
+// ✅ PORT from Railway
 const PORT = process.env.PORT;
 
-// ✅ OpenAI
+// ===== OPENAI SETUP =====
 const client = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY
 });
 
-// ✅ ROOT TEST
+// ===== ROOT TEST =====
 app.get("/", (req, res) => {
   res.send("API is working");
 });
 
-// ✅ SIMPLE AI ROUTE (no auth for now)
+// ===== SIMPLE AI CHAT =====
 app.post("/ai/chat", async (req, res) => {
   try {
     const { prompt } = req.body;
@@ -32,7 +33,6 @@ app.post("/ai/chat", async (req, res) => {
     });
 
     const reply = response.choices[0].message.content;
-
     res.json({ reply });
 
   } catch (err) {
@@ -41,7 +41,7 @@ app.post("/ai/chat", async (req, res) => {
   }
 });
 
-// ✅ START SERVER
+// ===== START SERVER =====
 app.listen(PORT, () => {
   console.log("Server running on " + PORT);
 });
